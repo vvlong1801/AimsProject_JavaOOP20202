@@ -1,21 +1,30 @@
 package hust.soict.hedspi.aims.order;
-import hust.soict.hedspi.aims.disc.DigitalVideoDisc;
+import java.util.ArrayList;
+import hust.soict.hedspi.aims.media.Media;
 import hust.soict.hedspi.aims.utils.MyDate;
 
 public class Order {
 	public static final int MAX_NUMBERS_ORDERED = 10;
-	private DigitalVideoDisc itemsOrdered[] = new DigitalVideoDisc[MAX_NUMBERS_ORDERED];
-	private int qtyOrdered=0;
+	public static final int MAX_LIMIT_ORDERS =5;
+	private static int nbOrders =0;
+	private ArrayList<Media> itemsOrdered = new ArrayList<Media>();
 	private MyDate dateOrdered = new MyDate();
+	
+	//getter, setter & constructor==============
 	public Order() {
 		super();
+		if(nbOrders > MAX_LIMIT_ORDERS) System.out.println("You have " + MAX_LIMIT_ORDERS + "orders, so can't order now!");
+		else setNbOrders(getNbOrders()+1);
 	}
 	
-	public int getQtyOrdered() {
-		return qtyOrdered;
+	public static int getNbOrders() {
+		return nbOrders;
 	}
 
-	
+	public static void setNbOrders(int nbOrders) {
+		Order.nbOrders = nbOrders;
+	}
+
 	public MyDate getDateOrdered() {
 		return dateOrdered;
 	}
@@ -23,50 +32,37 @@ public class Order {
 	public void setDateOrdered(MyDate dateOrdered) {
 		this.dateOrdered = dateOrdered;
 	}
-
-	public void addDigitalVideoDisc(DigitalVideoDisc disc) {
-		if(qtyOrdered >= MAX_NUMBERS_ORDERED) {
-			System.out.println(disc.getTitle() + " isn't create!! "+"The ordered is almost full");
+	
+	//method========================
+	public void addMedia (Media media) {
+		if(this.itemsOrdered.size()>=MAX_NUMBERS_ORDERED) {
+			System.out.println("The order is full!! Can't add " + media.getTitle());
 			return;
 		}
-		else {
-			for(int i=0; i<MAX_NUMBERS_ORDERED; i++) {
-				if(itemsOrdered[i]==null) {
-					itemsOrdered[i]=disc;
-					qtyOrdered++;
-					System.out.println(disc.getTitle() + " is created;");
-					break;
-				}
-			}
-		}
-	}
-	public void addDigitalVideoDisc(DigitalVideoDisc dvd1, DigitalVideoDisc dvd2 ) {
-		this.addDigitalVideoDisc(dvd1);
-		this.addDigitalVideoDisc(dvd2);
+		else this.itemsOrdered.add(media);
 	}
 	
-	public void addDigitalVideoDisc (DigitalVideoDisc [] dvdList) {
-		for(DigitalVideoDisc dvd : dvdList) {
-			if(dvd!=null) this.addDigitalVideoDisc(dvd);
+	public void addMedia (Media[] medias) {
+		for(Media m : medias) {
+			this.addMedia(m);
 		}
 	}
 	
-	public void removeDigitalVideoDisc(DigitalVideoDisc disc) {
-		for(int i=0; i<MAX_NUMBERS_ORDERED ;i++) {
-			if(itemsOrdered[i].getTitle().equals(disc.getTitle())) {
-				itemsOrdered[i] = null;
-				qtyOrdered--;
-				System.out.println(disc.getTitle() + " is removed!!");
+	public void removeMedia (Media media) {
+		for(int i=0; i < this.itemsOrdered.size(); i++) {
+			if(this.itemsOrdered.indexOf(media) == i) {
+				this.itemsOrdered.remove(i);
+				System.out.println("Remove " + media.getTitle() + " is successfull!!");
 				return;
 			}
 		}
-		System.out.println("not find " + disc.getTitle() +"!!");
 	}
+
 	
 	public float totalCost() {
 		float total=0;
-		for(int i=0; i<MAX_NUMBERS_ORDERED; i++) {
-			if(itemsOrdered[i]!=null || itemsOrdered[i]!= this.getALuckyItem()) total +=itemsOrdered[i].getCost();
+		for(int i=0; i<this.itemsOrdered.size(); i++) {
+			if(i!=this.getALuckyItem()) total += this.itemsOrdered.get(i).getCost();
 		}
 		return total;
 	}
@@ -74,20 +70,18 @@ public class Order {
 	public void show() {
 		System.out.println("**********************Order**********************");
 		System.out.println(this.dateOrdered);
-		for(int i=0; i< MAX_NUMBERS_ORDERED;i++) {
-			if(itemsOrdered[i]==null) continue;
-			System.out.println("DVD - " + itemsOrdered[i].getTitle() + " - " + itemsOrdered[i].getCategory() + " - " +itemsOrdered[i].getDirector()+" - "+itemsOrdered[i].getLength()+": "+itemsOrdered[i].getCost()+"$");
+		for(Media m : this.itemsOrdered) {
+			System.out.println(m);
 		}
-		System.out.println("free " + this.getALuckyItem().getTitle() + "!!!");
-		System.out.println(this.totalCost());
+		System.out.println("\nTotal cost: "+this.totalCost() + '$');
 		System.out.println("*************************************************");
 	}
 	
-	public DigitalVideoDisc getALuckyItem() {
+	public int getALuckyItem() {
 		int luckyNum = (int)(Math.random()*10);
-		for(int i=0; i< MAX_NUMBERS_ORDERED;i++) {
-			if(i==luckyNum) return itemsOrdered[i];
+		for(int i=0; i < this.itemsOrdered.size(); i++) {
+			if(i==luckyNum) return i;
 		}
-		return null;
+		return -1;
 	}
 }
